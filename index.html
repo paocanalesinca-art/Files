@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Generador de Copies · Maestrías UP</title>
+<style>
+:root{
+  --bg:#f5f6fa; --card:#ffffff; --text:#1b1f27; --muted:#6b7280;
+  --accent:#0f4c81; --accent2:#c9a24b; --border:#e3e6ec;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#12141a; --card:#1b1e26; --text:#eef0f4; --muted:#9aa1ad; --border:#2b2f3a;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#12141a; --card:#1b1e26; --text:#eef0f4; --muted:#9aa1ad; --border:#2b2f3a;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px);}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;}
+.wrap{max-width:760px;margin:0 auto;padding:24px 16px 60px;}
+h1{font-size:1.4rem;margin:4px 0 2px;}
+p.sub{color:var(--muted);margin:0 0 20px;font-size:.92rem;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:16px;}
+label{display:block;font-size:.85rem;font-weight:600;margin:12px 0 5px;}
+label.req::after{content:" *";color:#d94848;}
+input,select,textarea{width:100%;padding:10px 11px;border-radius:9px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:.92rem;font-family:inherit;}
+textarea{min-height:70px;resize:vertical;}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+@media (max-width:520px){.row2{grid-template-columns:1fr;}}
+.hidden{display:none;}
+button#gen{margin-top:18px;width:100%;padding:13px;border:none;border-radius:10px;background:var(--accent);color:#fff;font-size:1rem;font-weight:700;cursor:pointer;}
+button#gen:disabled{opacity:.6;cursor:default;}
+#status{font-size:.85rem;color:var(--muted);margin-top:8px;min-height:1.2em;}
+.results{margin-top:26px;display:grid;gap:16px;}
+.ver{border-radius:14px;padding:18px;color:#fff;white-space:pre-wrap;font-size:.94rem;line-height:1.5;}
+.ver h3{margin:0 0 10px;font-size:.95rem;letter-spacing:.02em;text-transform:uppercase;opacity:.9;}
+.ver.v1{background:linear-gradient(135deg,#0f4c81,#123b63);}
+.ver.v2{background:linear-gradient(135deg,#0e7c66,#0a5a4b);}
+.ver.v3{background:linear-gradient(135deg,#7a3fae,#5a2c85);}
+.charcount{font-size:.75rem;opacity:.75;margin-top:10px;}
+.calcbox{margin-top:6px;padding:10px 12px;border-radius:9px;background:rgba(15,76,129,.08);border:1px solid var(--accent);font-size:.85rem;line-height:1.5;}
+footer{text-align:center;color:var(--muted);font-size:.75rem;margin-top:30px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🎓 Generador de Copies SPARC</h1>
+  <p class="sub">Maestrías y posgrados · Universidad del Pacífico — WhatsApp / Chattigo</p>
+
+  <div class="card">
+    <label class="req">Nombre de la maestría</label>
+    <input id="programa" type="text" placeholder="Ej. Maestría en Auditoría">
+
+    <label>Escuela</label>
+    <select id="escuela">
+      <option value="PBS">PBS — Pacífico Business School</option>
+      <option value="EGP">EGP — Escuela de Gestión Pública</option>
+    </select>
+
+    <label>Link del brochure</label>
+    <input id="brochure" type="url" placeholder="https://...">
+
+    <div class="row2">
+      <div>
+        <label>Personalizar con nombre</label>
+        <select id="personalizar"><option value="no">No</option><option value="si">Sí</option></select>
+      </div>
+      <div>
+        <label>Fecha de inicio</label>
+        <input id="fecha" type="text" placeholder="Ej. 12 de octubre">
+      </div>
+    </div>
+
+    <label>Modalidad</label>
+    <select id="modalidad">
+      <option>Presencial</option>
+      <option>Virtual</option>
+      <option>Virtual en vivo</option>
+      <option>Híbrida</option>
+      <option>Presencial + Virtual</option>
+      <option value="otros">Otros</option>
+    </select>
+    <div id="modalidadOtroField" class="hidden">
+      <label>Especifica la modalidad</label>
+      <input id="modalidadOtro" type="text" placeholder="Ej. Semipresencial con módulos internacionales">
+    </div>
+
+    <label>Experiencia internacional</label>
+    <select id="intl"><option value="no">No</option><option value="si">Sí</option></select>
+    <div id="intlFields" class="hidden row2">
+      <div><label>Universidad</label><input id="intlUni" type="text"></div>
+      <div><label>País</label><input id="intlPais" type="text"></div>
+    </div>
+
+    <div class="row2">
+      <div><label>Inversión (regular)</label><input id="inversion" type="text" placeholder="S/ 0.00"></div>
+      <div><label>Descuento (%)</label><input id="descuento" type="text" placeholder="Ej. 20"></div>
+    </div>
+    <div id="calcPreview" class="calcbox hidden"></div>
+
+    <label>Descuento válido solo 48 horas</label>
+    <select id="h48"><option value="no">No</option><option value="si">Sí</option></select>
+
+    <label>¿Hay financiamiento?</label>
+    <select id="financia"><option value="no">No</option><option value="si">Sí</option></select>
+    <div id="financiaFields" class="hidden">
+      <div class="row2">
+        <div><label>Monto de matrícula</label><input id="matricula" type="text" placeholder="S/ 0.00"></div>
+        <div><label>N° de cuotas</label><input id="cuotas" type="text" placeholder="Ej. 36"></div>
+      </div>
+      <label>Monto por cuota</label>
+      <input id="montoCuota" type="text" placeholder="Se calcula automáticamente, o escríbelo tú">
+      <div id="cuotaPreview" class="calcbox hidden"></div>
+    </div>
+
+    <label>¿Cierre de matrículas / últimos cupos confirmado?</label>
+    <select id="escasez"><option value="no">No</option><option value="si">Sí</option></select>
+    <div id="escasezFields" class="hidden">
+      <label>Detalle (ej. "últimas vacantes", "cerramos admisión este viernes")</label>
+      <input id="escasezDetalle" type="text">
+    </div>
+
+    <label>Info adicional (diferenciales, horarios, contenido de brochure pegado, etc.)</label>
+    <textarea id="extra" placeholder="Pega aquí cualquier dato del brochure o campaña que quieras asegurar que se use..."></textarea>
+
+    <button id="gen">Generar 3 versiones de copy</button>
+    <div id="status"></div>
+  </div>
+
+  <div id="out" class="results"></div>
+  <footer>Los datos se procesan solo para generar el copy; no se guarda nada.</footer>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+$('intl').addEventListener('change',e=>$('intlFields').classList.toggle('hidden',e.target.value!=='si'));
+$('financia').addEventListener('change',e=>$('financiaFields').classList.toggle('hidden',e.target.value!=='si'));
+$('modalidad').addEventListener('change',e=>$('modalidadOtroField').classList.toggle('hidden',e.target.value!=='otros'));
+$('escasez').addEventListener('change',e=>$('escasezFields').classList.toggle('hidden',e.target.value!=='si'));
+
+function parseMonto(str){
+  const n=parseFloat(String(str).replace(/[^0-9.,]/g,'').replace(/,/g,''));
+  return isNaN(n)?null:n;
+}
+function fmt(n){
+  return n.toLocaleString('es-PE',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+function updateCalc(){
+  const box=$('calcPreview');
+  const inv=parseMonto($('inversion').value);
+  const pct=parseMonto($('descuento').value);
+  if(inv===null || pct===null){ box.classList.add('hidden'); box.innerHTML=''; return; }
+  const descuentoMonto = inv*(pct/100);
+  const final = inv - descuentoMonto;
+  box.classList.remove('hidden');
+  box.innerHTML = `💰 Inversión regular: <b>S/ ${fmt(inv)}</b><br>🎁 Descuento (${pct}%): <b>S/ ${fmt(descuentoMonto)}</b><br>🔥 Inversión final: <b>S/ ${fmt(final)}</b>`;
+}
+$('inversion').addEventListener('input',updateCalc);
+$('descuento').addEventListener('input',updateCalc);
+
+function updateCuota(){
+  const box=$('cuotaPreview');
+  const inv=parseMonto($('inversion').value);
+  const pct=parseMonto($('descuento').value);
+  const matricula=parseMonto($('matricula').value) || 0;
+  const cuotas=parseMonto($('cuotas').value);
+  if(inv===null || !cuotas || cuotas<=0){ box.classList.add('hidden'); box.innerHTML=''; return; }
+  const base = (pct!==null) ? inv-(inv*(pct/100)) : inv;
+  const saldo = base - matricula;
+  const cuota = saldo/cuotas;
+  $('montoCuota').value = fmt(cuota);
+  box.classList.remove('hidden');
+  box.innerHTML = `📐 (S/ ${fmt(base)} − S/ ${fmt(matricula)} matrícula) ÷ ${cuotas} cuotas = <b>S/ ${fmt(cuota)} por cuota</b>`;
+}
+['inversion','descuento','matricula','cuotas'].forEach(id=>$(id).addEventListener('input',updateCuota));
+
+const MASTER_PROMPT = `Eres un Copywriter Senior especializado en marketing educativo de posgrados, experto en mensajes de conversión para WhatsApp/Chattigo.
+
+FUENTES: usa solo los datos de campaña dados abajo + el contenido del brochure si se pudo leer. Prioridad: datos de campaña > brochure > conocimiento general. No mezcles campañas anteriores ni inventes precios, fechas, escuelas, becas, cupos, financiamiento, resultados profesionales o experiencia internacional que no estén dados.
+
+INSTITUCIÓN: la escuela viene dada explícitamente en los datos de campaña (Pacífico Business School o Escuela de Gestión Pública de la Universidad del Pacífico) y ese es el nombre correcto a usar siempre, sin importar lo que diga el brochure. En el copy, el nombre de la maestría siempre debe ir seguido de "de [Escuela]", tal como se indica en los datos de campaña.
+
+MÉTODO: no copies características mecánicamente. Convierte cada dato relevante en CARACTERÍSTICA → BENEFICIO → IMPACTO EN LA VIDA PROFESIONAL. Encuentra en los datos el argumento más vendible (hook): compatibilidad con trabajo, horarios, modalidad, prestigio, especialización, networking, internacionalización, flexibilidad, etc. Solo infiere necesidades del prospecto cuando estén sustentadas por el dato (ej. si hay clases de fin de semana, puedes decir "si trabajas de lunes a viernes...").
+
+OFERTA: si hay inversión regular + % descuento, calcula monto de descuento e inversión final correctamente y muéstralos. Usa "válido solo por 48 horas" únicamente si se indicó que sí. Usa frases de escasez/cierre de matrículas (últimos cupos, cerrando matrículas, sujeto a disponibilidad) ÚNICAMENTE si el dato "Cierre de matrículas / últimos cupos" viene marcado como Sí; si es No, no menciones escasez en ninguna versión.
+
+ESTILO Y FORMATO: profesional, ejecutivo, cercano, persuasivo, como un asesor de posgrado (nunca "¿te animas?", "corre que se acaba", etc.). Formato WhatsApp con jerarquía visual clara, imitando esta estructura de referencia (adapta los datos, no copies literalmente):
+🎁 *[Hook con el beneficio/descuento en S/ o %]*
+👋 Hola, [Nombre]. (solo si personalizar=Sí)
+🔥 _[Pregunta o frase que conecta con la situación del profesional]_
+🎓 [Nombre de la maestría] de [Escuela] (ej. "Maestría de Auditoría de Pacífico Business School")
+🚀 [Párrafo breve: beneficio + modalidad + diferencial, característica→beneficio→impacto]
+
+✨ *[Beneficio del descuento]*
+🚨 _*Válido solo por 48 horas*_🚨 (solo si aplica)
+
+💰 *Inversión regular:* S/ [monto]
+🎁 *Descuento:* S/ [monto descuento] ([%])
+🔥 *Inversión final:* S/ [monto final]
+
+📅 *Inicio:* [fecha]
+💻 *Modalidad:* [modalidad]
+📚 *Clases:* [horario si se dedujo de la modalidad/info adicional]
+
+💳 *Financiamiento: [detalle cuotas]* (solo si aplica)
+
+⏳ [Frase de escasez] (SOLO si está confirmada)
+
+👉 [CTA en forma de pregunta, ej. "¿Te comparto más información para acceder al beneficio?"]
+
+Usa *negritas con asteriscos* y _cursivas con guion bajo_ como en el ejemplo, máximo 7 emojis, máximo 1024 caracteres por versión. Omite cualquier bloque cuyo dato no exista (no dejes campos vacíos ni inventados). Nunca uses la palabra "programa"; refiérete siempre a la maestría por su nombre o como "maestría".
+
+ENTREGA: genera exactamente 3 versiones con ángulos realmente distintos (no cambies solo palabras, todas siguen el formato visual de arriba pero con énfasis distinto):
+VERSIÓN 1 — IMPACTO + OFERTA: hook fuerte con el descuento, beneficio económico, cálculo de inversión, diferencial principal.
+VERSIÓN 2 — CARRERA + TRANSFORMACIÓN: situación profesional, necesidad, beneficio académico, transformación, compatibilidad con trabajo si aplica; la oferta económica aparece pero en segundo plano.
+VERSIÓN 3 — FOMO / ÚLTIMA OPORTUNIDAD: prioriza la urgencia real disponible (48 horas, cierre de matrículas o disponibilidad limitada, solo si esos datos fueron confirmados) enmarcando el mensaje como "última oportunidad para acceder al beneficio"; si no hay ningún dato real de urgencia, usa como urgencia únicamente el vencimiento del descuento (si el descuento de 48h fue confirmado) y, si tampoco eso existe, no inventes urgencia y en su lugar refuerza el diferencial más fuerte con un cierre directo a la acción.
+
+Responde SOLO en JSON válido, sin texto adicional, con esta forma exacta:
+{"v1":"texto version 1","v2":"texto version 2","v3":"texto version 3"}`;
+
+function buildBrief(){
+  const val=id=>$(id).value.trim();
+  const ESCUELA_NOMBRES={PBS:'Pacífico Business School', EGP:'Escuela de Gestión Pública de la Universidad del Pacífico'};
+  let lines=[];
+  lines.push('Maestría: '+val('programa'));
+  lines.push('Escuela: '+ESCUELA_NOMBRES[$('escuela').value]+' — el nombre completo del programa en el copy debe ir así: "'+val('programa')+' de '+ESCUELA_NOMBRES[$('escuela').value]+'"');
+  if(val('brochure')) lines.push('Link brochure (referencia, puede no estar accesible): '+val('brochure'));
+  lines.push('Personalizar con nombre: '+(val('personalizar')==='si'?'Sí (usar "Hola, [Nombre]")':'No'));
+  if(val('fecha')) lines.push('Fecha de inicio: '+val('fecha'));
+  const modalidadVal = $('modalidad').value==='otros' ? val('modalidadOtro') : val('modalidad');
+  lines.push('Modalidad: '+modalidadVal);
+  if($('intl').value==='si'){
+    lines.push('Experiencia internacional: Sí — Universidad: '+val('intlUni')+', País: '+val('intlPais'));
+  } else lines.push('Experiencia internacional: No / no mencionar');
+  if(val('inversion')) lines.push('Inversión regular: '+val('inversion'));
+  if(val('descuento')) lines.push('Descuento: '+val('descuento')+'%');
+  lines.push('Descuento válido solo 48 horas: '+($('h48').value==='si'?'Sí':'No'));
+  if($('financia').value==='si'){
+    lines.push('Financiamiento: Sí — Matrícula: '+(val('matricula')||'no especificada')+', '+val('cuotas')+' cuotas de '+val('montoCuota'));
+  } else lines.push('Financiamiento: No mencionar');
+  if($('escasez').value==='si'){
+    lines.push('Cierre de matrículas / últimos cupos: Sí — '+(val('escasezDetalle')||'sin detalle adicional, usar frase genérica de disponibilidad limitada'));
+  } else lines.push('Cierre de matrículas / últimos cupos: No confirmado, NO mencionar escasez');
+  if(val('extra')) lines.push('Info adicional / contenido de brochure pegado:\n'+val('extra'));
+  return lines.join('\n');
+}
+
+async function fetchBrochureText(url){
+  try{
+    const r=await fetch(url,{mode:'cors'});
+    if(!r.ok) throw new Error('status '+r.status);
+    const html=await r.text();
+    const text=html.replace(/<script[\s\S]*?<\/script>/gi,'')
+                    .replace(/<style[\s\S]*?<\/style>/gi,'')
+                    .replace(/<[^>]+>/g,' ')
+                    .replace(/\s+/g,' ')
+                    .trim();
+    return text.slice(0,4000);
+  }catch(e){ return null; }
+}
+
+$('gen').addEventListener('click', async ()=>{
+  const programa=$('programa').value.trim();
+  const status=$('status'), out=$('out'), btn=$('gen');
+  if(!programa){ status.textContent='⚠️ El nombre de la maestría es obligatorio.'; $('programa').focus(); return; }
+  btn.disabled=true; out.innerHTML=''; status.textContent='Conectando con el asistente…';
+
+  let brief=buildBrief();
+  const brochureUrl=$('brochure').value.trim();
+  if(brochureUrl){
+    status.textContent='Intentando leer el brochure…';
+    const txt=await fetchBrochureText(brochureUrl);
+    if(txt){ brief += '\n\nContenido extraído del brochure (recorta lo irrelevante):\n'+txt; }
+    else { brief += '\n\n(No se pudo leer el brochure automáticamente por restricciones del sitio; usa solo los datos de campaña e info adicional dados.)'; }
+  }
+
+  status.textContent='Generando las 3 versiones…';
+  try{
+    const r = await fetch('/api/generate', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ system: MASTER_PROMPT, brief })
+    });
+    if(!r.ok){ throw new Error('Error del servidor ('+r.status+')'); }
+    const res = await r.json();
+    const versions=[
+      {key:'v1', cls:'v1', label:'Versión 1 — Impacto + Oferta'},
+      {key:'v2', cls:'v2', label:'Versión 2 — Carrera + Transformación'},
+      {key:'v3', cls:'v3', label:'Versión 3 — FOMO / Última Oportunidad'}
+    ];
+    out.innerHTML = versions.map(v=>{
+      const txt = (res && res[v.key]) ? res[v.key] : '(sin contenido)';
+      return `<div class="ver ${v.cls}"><h3>${v.label}</h3>${txt.replace(/&/g,'&amp;').replace(/</g,'&lt;')}<div class="charcount">${txt.length} caracteres</div></div>`;
+    }).join('');
+    status.textContent='Listo.';
+  }catch(e){
+    status.textContent='⚠️ No se pudo generar: '+(e && e.message ? e.message : 'error desconocido');
+  }
+  btn.disabled=false;
+});
+</script>
+</body>
+</html>
